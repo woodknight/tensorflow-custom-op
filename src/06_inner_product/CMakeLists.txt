@@ -1,6 +1,6 @@
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules) 
 find_package(TensorFlow REQUIRED)
-find_package(CUDA 9 REQUIRED)
+find_package(CUDA 10 REQUIRED)
 
 # set necessary flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS} -march=native -fopenmp -D_GLIBCXX_USE_CXX11_ABI=${TensorFlow_ABI}")
@@ -16,4 +16,4 @@ include_directories(SYSTEM ${TensorFlow_INCLUDE_DIR})
 include_directories(SYSTEM "/usr/local/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
-add_tensorflow_gpu_operation(example)
+add_tensorflow_cpu_operation(inner_product)
