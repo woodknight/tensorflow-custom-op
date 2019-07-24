@@ -1,3 +1,6 @@
+#ifndef __ZERO_OUT_OP_H__
+#define __ZERO_OUT_OP_H__
+
 #include <tensorflow/core/framework/op.h>
 #include <tensorflow/core/framework/shape_inference.h>
 
@@ -11,3 +14,5 @@ REGISTER_OP("ZeroOut")
         c->set_output(0, c->input(0));
         return Status::OK();
     });
+
+#endif // __ZERO_OUT_OP_H__
