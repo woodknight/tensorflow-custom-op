@@ -4,10 +4,14 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/jiang/anaconda3/envs/tensorflow/lib/python3.7/site-packages/tensorflow/include"
+                "/home/jiang/anaconda3/envs/tensorflow/lib/python3.7/site-packages/tensorflow/include",
+                "/usr/local",
+                "/usr/local/cuda/include"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/clang",
+            "defines": [
+                "GOOGLE_CUDA"
+            ],
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"

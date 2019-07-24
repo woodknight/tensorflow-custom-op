@@ -123,7 +123,7 @@ else()
     # However, only TensorFlow versions 1.9, 1.10 support all header files
     # for custom ops.
     set(_TensorFlow_KNOWN_VERSIONS ${TensorFlow_ADDITIONAL_VERSIONS}
-        "1.9" "1.9.0" "1.10" "1.10.0" "1.11" "1.11.0" "1.12" "1.12.0" "1.13" "1.13.1")
+        "1.9" "1.9.0" "1.10" "1.10.0" "1.11" "1.11.0" "1.12" "1.12.0" "1.13" "1.13.1" "1.14" "1.14.0")
     set(_TensorFlow_TEST_VERSIONS)
 
     if(TF_FIND_VERSION)
@@ -259,23 +259,37 @@ macro(add_tensorflow_cpu_operation op_name)
 endmacro()
 
 
-macro(add_tensorflow_gpu_operation op_name)
+macro(add_tensorflow_gpu_operation_bk op_name)
 # Compiles a CPU + GPU operation with invoking NVCC
   message(STATUS "will build custom TensorFlow operation \"${op_name}\" (CPU+GPU)")
 
   set(kernel_file "")
   if(EXISTS "kernels/${op_name}_kernel.cu")
      message(WARNING "you should rename your file ${op_name}_kernel.cu to ${op_name}_kernel_gpu.cu.cc")
-     set(kernel_file kernels/${op_name}_kernel.cu)
+     set(kernel_file kernels/${op_name}_kernels.cu)
   else()
-    set_source_files_properties(kernels/${op_name}_kernel_gpu.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-     set(kernel_file kernels/${op_name}_kernel_gpu.cu.cc)
+     set_source_files_properties(kernels/${op_name}_kernels.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+     set(kernel_file kernels/${op_name}_kernels.cu.cc)
   endif()
 
-  cuda_add_library(${op_name}_op_cu SHARED ${kernel_file})
+  cuda_add_library(${op_name}_cu ${kernel_file})
+  set_target_properties(${op_name}_cu PROPERTIES PREFIX "")
+
+  add_library(${op_name}_op SHARED kernels/${op_name}_kernels.cc ops/${op_name}_ops.cc )
+
+  set_target_properties(${op_name}_op PROPERTIES PREFIX "")
+  set_target_properties(${op_name}_op PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
+  target_link_libraries(${op_name}_op LINK_PUBLIC ${op_name}_cu ${TensorFlow_LIBRARY})
+endmacro()
+
+macro(add_tensorflow_gpu_operation op_name)
+  set_source_files_properties(${op_name}_op.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+  set(kernel_file ${op_name}_op.cu.cc)
+
+  cuda_add_library(${op_name}_op_cu ${kernel_file})
   set_target_properties(${op_name}_op_cu PROPERTIES PREFIX "")
 
-  add_library(${op_name}_op SHARED kernels/${op_name}_op.cc kernels/${op_name}_kernel.cc ops/${op_name}.cc )
+  add_library(${op_name}_op SHARED ${op_name}_op.cc)
 
   set_target_properties(${op_name}_op PROPERTIES PREFIX "")
   set_target_properties(${op_name}_op PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
