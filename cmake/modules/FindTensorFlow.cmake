@@ -242,7 +242,7 @@ macro(add_tensorflow_cpu_operation op_name)
     # Compiles a CPU-only operation without invoking NVCC
     message(STATUS "will build custom TensorFlow operation \"${op_name}\" (CPU only)")
 
-    add_library(${op_name}_ops SHARED kernels/${op_name}_ops.cc ops/${op_name}_ops.cc )
+    add_library(${op_name}_ops SHARED kernels/${op_name}_kernels.cc ops/${op_name}_ops.cc )
 
     set_target_properties(${op_name}_ops PROPERTIES PREFIX "")
     target_link_libraries(${op_name}_ops LINK_PUBLIC ${TensorFlow_LIBRARY})
@@ -266,16 +266,16 @@ macro(add_tensorflow_gpu_operation op_name)
     set(kernel_file "")
     if(EXISTS "kernels/${op_name}_ops_gpu.cu")
         message(WARNING "you should rename your file ${op_name}_kernel.cu to ${op_name}_kernel_gpu.cu.cc")
-        set(kernel_file kernels/${op_name}_ops_gpu.cu)
+        set(kernel_file kernels/${op_name}_kernels_gpu.cu)
     else()
-        set_source_files_properties(kernels/${op_name}_ops_gpu.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-        set(kernel_file kernels/${op_name}_ops_gpu.cu.cc)
+        set_source_files_properties(kernels/${op_name}_kernels_gpu.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+        set(kernel_file kernels/${op_name}_kernels_gpu.cu.cc)
     endif()
 
     cuda_add_library(${op_name}_ops_cu ${kernel_file})
     set_target_properties(${op_name}_ops_cu PROPERTIES PREFIX "")
 
-    add_library(${op_name}_ops SHARED kernels/${op_name}_ops.cc ops/${op_name}_ops.cc )
+    add_library(${op_name}_ops SHARED kernels/${op_name}_kernels.cc ops/${op_name}_ops.cc )
 
     set_target_properties(${op_name}_ops PROPERTIES PREFIX "")
     set_target_properties(${op_name}_ops PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
