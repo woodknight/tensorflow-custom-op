@@ -4,8 +4,17 @@ import tensorflow as tf
 from tensorflow.python.framework import ops
 import numpy as np
 
-with tf.Session() as sess:
-    with ops.device("/cpu:0"):
-        # m = inner_product_ops.inner_product([[1.0], [2.0]], [[1.0, 2.0], [3.0, 4.0]]).eval()
-        m = inner_product_ops.inner_product([[1], [2]], [[1, 2], [3, 4]]).eval()
-    print(m)
+class InnerProductOpTest(tf.test.TestCase):
+    def testInnerProduct(self):
+        for d in ["/cpu:0", "/gpu:0"]:
+            with ops.device(d):
+                with tf.Session():
+                    for H in range(1, 10):
+                        for W in range(1, 10):
+                            weight = np.random.rand(H, W).astype(np.float32)
+                            data = np.random.rand(W, 1).astype(np.float32)
+                            m = inner_product_ops.inner_product(data, weight).eval()
+                            self.assertAllClose(m, weight @ data)
+
+if __name__ == "__main__":
+    tf.test.main()

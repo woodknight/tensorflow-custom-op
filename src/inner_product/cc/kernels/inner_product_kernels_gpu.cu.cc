@@ -30,7 +30,7 @@ __global__ void InnerProductCudaKernel(int weight_height, int weight_width, cons
 // GPU specialization of the actual computation
 // Define the GPU implementation that launches the CUDA kernel
 template <typename T>
-struct InnerProductFunctor<GPUDevice, T>
+struct InnerProductFunctor<GPUDevice, T>    // partial template specialization
 {
     void operator()(const GPUDevice &d, int weight_height, int weight_width, const T *data, const T *weight, T *out)
     {
@@ -42,6 +42,7 @@ struct InnerProductFunctor<GPUDevice, T>
 };
 
 // Explicitly instantiate functors for the types of OpKernels registered
+// explicit (full) template specialization
 template struct InnerProductFunctor<GPUDevice, int32>;
 template struct InnerProductFunctor<GPUDevice, float>;
     

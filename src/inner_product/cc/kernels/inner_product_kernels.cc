@@ -15,7 +15,7 @@ namespace functor
 {
 
 template <typename T>
-struct InnerProductFunctor<CPUDevice, T>
+struct InnerProductFunctor<CPUDevice, T>    // partial template specialization
 {
     // CPU specialization of the computation
     void operator()(const CPUDevice &d, int weight_height, int weight_width, const T *data, const T *weight, T *out)
@@ -94,14 +94,18 @@ REGISTER_CPU(float);
 REGISTER_CPU(int32);
 
 // Register the GPU kernels
+#ifdef GOOGLE_CUDA
 #define REGISTER_GPU(T) \
+    extern template struct InnerProductFunctor<GPUDevice, T>; \
     REGISTER_KERNEL_BUILDER(    \
         Name("InnerProduct").Device(DEVICE_GPU).TypeConstraint<T>("T"), \
         InnerProductOp<GPUDevice, T>    \
     );
 
-REGISTER_GPU(int32);
 REGISTER_GPU(float);
+REGISTER_GPU(int32);
+
+#endif
 
 } // namespace functor
 } // namespace tensorflow
