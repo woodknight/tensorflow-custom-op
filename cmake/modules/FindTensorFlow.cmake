@@ -248,17 +248,6 @@ macro(add_tensorflow_cpu_operation op_name)
     target_link_libraries(${op_name}_ops LINK_PUBLIC ${TensorFlow_LIBRARY})
 endmacro()
 
-macro(add_tensorflow_cpu_operation_v1 op_name)
-    # Compiles a CPU-only operation without invoking NVCC
-    message(STATUS "will build custom TensorFlow operation \"${op_name}\" (CPU only)")
-
-    add_library(${op_name}_op SHARED ${op_name}_op.cc)
-
-    set_target_properties(${op_name}_op PROPERTIES PREFIX "")
-    target_link_libraries(${op_name}_op LINK_PUBLIC ${TensorFlow_LIBRARY})
-endmacro()
-
-
 macro(add_tensorflow_gpu_operation op_name)
 # Compiles a CPU + GPU operation with invoking NVCC
     message(STATUS "will build custom TensorFlow operation \"${op_name}\" (CPU+GPU)")
@@ -280,20 +269,6 @@ macro(add_tensorflow_gpu_operation op_name)
     set_target_properties(${op_name}_ops PROPERTIES PREFIX "")
     set_target_properties(${op_name}_ops PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
     target_link_libraries(${op_name}_ops LINK_PUBLIC ${op_name}_ops_cu ${TensorFlow_LIBRARY})
-endmacro()
-
-macro(add_tensorflow_gpu_operation_v1 op_name)
-    set_source_files_properties(${op_name}.cu.cc PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-    set(kernel_file ${op_name}.cu.cc)
-
-    cuda_add_library(${op_name}_op_cu ${kernel_file})
-    set_target_properties(${op_name}_op_cu PROPERTIES PREFIX "")
-
-    add_library(${op_name}_op SHARED ${op_name}.cc)
-
-    set_target_properties(${op_name}_op PROPERTIES PREFIX "")
-    set_target_properties(${op_name}_op PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
-    target_link_libraries(${op_name}_op LINK_PUBLIC ${op_name}_op_cu ${TensorFlow_LIBRARY})
 endmacro()
 
 

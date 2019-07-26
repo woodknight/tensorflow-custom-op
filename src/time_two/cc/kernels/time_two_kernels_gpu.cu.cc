@@ -43,4 +43,4 @@ template struct TimeTwoFunctor<GPUDevice, int32>;
 } // namespace tensorflow
 
 
-#endif  // GOOGLe_CUDA
+#endif  // GOOGLE_CUDA

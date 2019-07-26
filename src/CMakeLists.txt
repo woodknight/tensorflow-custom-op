@@ -3,5 +3,5 @@
 # add_subdirectory("03-stackoverflow")
 # add_subdirectory("04-tf-custom-op-github")
 # add_subdirectory("05-bilateral-slice")
-add_subdirectory("time_two/cc")
-# add_subdirectory("inner_product/cc")
+# add_subdirectory("time_two/cc")
+add_subdirectory("inner_product/cc")

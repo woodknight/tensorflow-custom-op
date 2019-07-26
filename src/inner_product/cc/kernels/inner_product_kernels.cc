@@ -20,9 +20,16 @@ struct InnerProductFunctor<CPUDevice, T>
     // CPU specialization of the computation
     void operator()(const CPUDevice &d, int weight_height, int weight_width, const T *data, const T *weight, T *out)
     {
-        for(int i = 0; i < weight_height; i++)
-            for(int j = 0; j < weight_width; j++)
-                out[i] = weight[i*weight_width + j] * data[j];
+        for(int y = 0; y < weight_height; y++)
+        {
+            T sum = 0;
+            for(int x = 0; x < weight_width; x++)
+            {
+                int offset = y * weight_width + x;
+                sum += weight[offset] * data[x];
+            }
+            out[y] = sum;
+        }
     }
 };
 
@@ -85,6 +92,16 @@ public:
 
 REGISTER_CPU(float);
 REGISTER_CPU(int32);
+
+// Register the GPU kernels
+#define REGISTER_GPU(T) \
+    REGISTER_KERNEL_BUILDER(    \
+        Name("InnerProduct").Device(DEVICE_GPU).TypeConstraint<T>("T"), \
+        InnerProductOp<GPUDevice, T>    \
+    );
+
+REGISTER_GPU(int32);
+REGISTER_GPU(float);
 
 } // namespace functor
 } // namespace tensorflow
