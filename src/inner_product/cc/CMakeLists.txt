@@ -16,4 +16,4 @@ include_directories(SYSTEM ${TensorFlow_INCLUDE_DIR})
 include_directories(SYSTEM "/usr/local/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
-add_tensorflow_gpu_operation(time_two)
+add_tensorflow_cpu_operation(inner_product)

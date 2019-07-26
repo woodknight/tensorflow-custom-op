@@ -279,7 +279,7 @@ macro(add_tensorflow_gpu_operation op_name)
 
     set_target_properties(${op_name}_ops PROPERTIES PREFIX "")
     set_target_properties(${op_name}_ops PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
-    target_link_libraries(${op_name}_ops LINK_PUBLIC ${op_name}_cu ${TensorFlow_LIBRARY})
+    target_link_libraries(${op_name}_ops LINK_PUBLIC ${op_name}_ops_cu ${TensorFlow_LIBRARY})
 endmacro()
 
 macro(add_tensorflow_gpu_operation_v1 op_name)

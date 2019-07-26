@@ -19,11 +19,12 @@ __global__ void TimeTwoCudaKernel(const int size, const T *in, T *out)
         out[i] = 2 * in[i];
 }
 
+// GPU specialization of the actual computation
 // Define the GPU implementation that launches the CUDA kernel
 template <typename T>
 struct TimeTwoFunctor<GPUDevice, T>
 {
-    void operator()(const GPUDevice &d, const T *in, T *out)
+    void operator()(const GPUDevice &d, int size, const T *in, T *out)
     {
         // launch the cuda kernel
         int block_count = 1024;

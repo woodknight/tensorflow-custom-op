@@ -1,3 +1,17 @@
 {
-    "python.pythonPath": "/home/jiang/anaconda3/envs/tensorflow/bin/python"
+    "python.pythonPath": "/home/jiang/anaconda3/envs/tensorflow/bin/python",
+    "files.associations": {
+        "*.cu": "cpp",
+        "*.cuh": "cpp",
+        "array": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "vector": "cpp",
+        "functional": "cpp",
+        "limits": "cpp",
+        "mutex": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
+    }
 }
