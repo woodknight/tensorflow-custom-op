@@ -107,7 +107,109 @@ REGISTER_GPU(int32);
 
 #endif
 
+//============================ OP Gradients ==========================
+template <typename T>
+struct InnerProductGradFunctor<CPUDevice, T>
+{
+    void operator()(const CPUDevice &d, int weight_height, int weight_width, 
+                    const T *data, const T *weight, const T *grad_output,
+                    T *grad_data, T *grad_weight)
+    {   
+        // y = Wx + b
+        // dC/dx = W^T (dC/dy)
+        // dC/dW = (dC/dy) x^T
+
+        // CPU specialization of the operation
+        // grad_data
+        for(int i = 0; i < weight_width; i++)
+        {
+            T sum = 0;
+            for(int j = 0; j < weight_height; j++)
+            {
+                sum += weight[j * weight_width + i] * grad_output[j];
+            }
+            grad_data[i] = sum;
+        }        
+
+        // grad_weight
+        for(int i = 0; i < weight_height; i++)
+        {
+            for(int j = 0; j < weight_width; j++)
+            {
+                grad_weight[i * weight_width + j] = grad_output[i] * data[j];
+            }
+        }
+    }
+};
+
+
+// OpKernel definition
+// template parameter <t> is the datatype of the tensors
+template <typename Device, typename T>
+class InnerProductGradOp : public OpKernel
+{
+public:
+    explicit InnerProductGradOp(OpKernelConstruction *context) : OpKernel(context) {}
+
+    void Compute(OpKernelContext *context) override
+    {
+        // grab the input tensors
+        const Tensor &data_tensor = context->input(0);
+        const Tensor &weight_tensor = context->input(1);
+        const Tensor &grad_output_tensor = context->input(2);
+
+        // check the input tensor shapes
+        const TensorShape &data_shape = data_tensor.shape();
+        const TensorShape &weight_shape = weight_tensor.shape();
+        const TensorShape &grad_output_shape = grad_output_tensor.shape();
+
+        CHECK_EQ(data_shape.dims(), 2);
+        CHECK_EQ(data_shape.dim_size(1), 1);
+
+        CHECK_EQ(grad_output_shape.dims(), 2);
+        CHECK_EQ(grad_output_shape.dim_size(1), 1);
+
+        CHECK_EQ(weight_shape.dims(), 2);
+        CHECK_EQ(weight_shape.dim_size(0), grad_output_shape.dim_size(0));
+        CHECK_EQ(weight_shape.dim_size(1), data_shape.dim_size(0));
+
+        // create the output tensor
+        Tensor *grad_data_tensor = nullptr;
+        Tensor *grad_weight_tensor = nullptr;
+
+        OP_REQUIRES_OK(context, context->allocate_output(0, data_shape, &grad_data_tensor));
+        OP_REQUIRES_OK(context, context->allocate_output(1, weight_shape, &grad_weight_tensor));
+
+        // Do the computation
+        OP_REQUIRES(context, data_tensor.NumElements() <= tensorflow::kint32max, 
+            errors::InvalidArgument("too many elements in input tensor"));
+        OP_REQUIRES(context, weight_tensor.NumElements() <= tensorflow::kint32max, 
+            errors::InvalidArgument("too many elements in input tensor"));
+
+        InnerProductGradFunctor<Device, T>()(
+            context->eigen_device<Device>(),
+            weight_shape.dim_size(0),
+            weight_shape.dim_size(1),
+            data_tensor.flat<T>().data(),
+            weight_tensor.flat<T>().data(),
+            grad_output_tensor.flat<T>().data(),
+            grad_data_tensor->flat<T>().data(),
+            grad_weight_tensor->flat<T>().data()
+        );
+    }
+};
+
+// register the CPU kernel
+#define REGISTER_CPU_GRAD(T) \
+    REGISTER_KERNEL_BUILDER(    \
+        Name("InnerProductGrad").Device(DEVICE_CPU).TypeConstraint<T>("T"), \
+        InnerProductGradOp<CPUDevice, T>    \
+    );
+
+REGISTER_CPU_GRAD(float);
+REGISTER_CPU_GRAD(int32);
 } // namespace functor
+
 } // namespace tensorflow
 
 

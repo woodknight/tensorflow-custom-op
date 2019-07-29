@@ -26,5 +26,21 @@ REGISTER_OP("InnerProduct")
         }
     );
 
+REGISTER_OP("InnerProductGrad")
+    .Attr("T: {int32, float}")
+    .Input("data: T")
+    .Input("weight: T")
+    .Input("grad_output: T")
+    .Output("grad_data: T")
+    .Output("grad_weight: T")
+    .SetShapeFn(
+        [](InferenceContext *c)
+        {
+            c->set_output(0, c->input(0));
+            c->set_output(1, c->input(1));
+            return Status::OK();
+        }
+    );
+
     
 } // namespace tensorflow
